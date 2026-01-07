@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { contacts, cSuite as cSuiteData, squads, downloadCSV } from '../lib/data';
+import { customers, getCustomerIds, getCustomer, downloadCSV } from '../lib/data';
 
 export default function Home() {
+  const [selectedCustomer, setSelectedCustomer] = useState('chime');
   const [activeTab, setActiveTab] = useState('org');
   const [contactFilter, setContactFilter] = useState('cardswitcher');
   const [expanded, setExpanded] = useState({
@@ -14,6 +15,12 @@ export default function Home() {
     baishi: true,
     will: true
   });
+
+  const customer = getCustomer(selectedCustomer);
+  const customerIds = getCustomerIds();
+  const allPeople = customer.contacts;
+  const teams = [...new Set(allPeople.map(p => p.team))];
+  const filteredContacts = contactFilter === 'all' ? allPeople : allPeople.filter(p => p.cardswitcher);
 
   const toggle = (id) => setExpanded(prev => ({ ...prev, [id]: !prev[id] }));
 
@@ -217,19 +224,12 @@ export default function Home() {
     </div>
   );
 
-  // All people data
-  const allPeople = contacts;
-
-  const teams = [...new Set(allPeople.map(p => p.team))];
-  const filteredContacts = contactFilter === 'all' ? allPeople : allPeople.filter(p => p.cardswitcher);
-
-  // Format cSuite data
-  const cSuite = cSuiteData.map(c => ({ n: c.name, r: c.role, li: c.linkedin }));
-
   // CSV Export handler
   const handleExportCSV = () => {
     const dataToExport = contactFilter === 'all' ? allPeople : filteredContacts;
-    const filename = contactFilter === 'all' ? 'chime_all_contacts.csv' : 'chime_cardswitcher_contacts.csv';
+    const filename = contactFilter === 'all' 
+      ? `${customer.name.toLowerCase()}_all_contacts.csv` 
+      : `${customer.name.toLowerCase()}_cardswitcher_contacts.csv`;
     downloadCSV(dataToExport, filename);
   };
 
@@ -257,40 +257,79 @@ export default function Home() {
             width: 32,
             height: 32,
             borderRadius: 8,
-            background: 'linear-gradient(135deg, #00d09c 0%, #00b386 100%)',
+            background: customer.logoColor || 'linear-gradient(135deg, #00d09c 0%, #00b386 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             color: '#fff',
             fontWeight: 700,
             fontSize: 14
-          }}>C</div>
+          }}>{customer.logo}</div>
           <div>
-            <div style={{ fontSize: 20, fontWeight: 700, color: '#111827' }}>Chime</div>
-            <div style={{ fontSize: 14, color: '#6b7280' }}>Banking Products Division</div>
+            <div style={{ fontSize: 20, fontWeight: 700, color: '#111827' }}>{customer.name}</div>
+            <div style={{ fontSize: 14, color: '#6b7280' }}>{customer.division}</div>
           </div>
         </div>
         
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+          {/* Customer Selector */}
+          {customerIds.length > 1 && (
+            <select
+              value={selectedCustomer}
+              onChange={(e) => {
+                setSelectedCustomer(e.target.value);
+                // Reset expanded state when switching customers
+                setExpanded({
+                  ceo: true,
+                  ryan: true,
+                  philip: true,
+                  brenden: true,
+                  baishi: true,
+                  will: true
+                });
+              }}
+              style={{
+                padding: '8px 16px',
+                borderRadius: 8,
+                border: '1px solid #e5e7eb',
+                background: '#fff',
+                color: '#111827',
+                fontSize: 14,
+                fontWeight: 500,
+                cursor: 'pointer',
+                outline: 'none'
+              }}
+            >
+              {customerIds.map(id => (
+                <option key={id} value={id}>
+                  {customers[id].name}
+                </option>
+              ))}
+            </select>
+          )}
+          
+          {/* Navigation Tabs */}
         <div style={{ display: 'flex', gap: 4 }}>
           {['org', 'teams', 'contacts'].map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               style={{
-                padding: '8px 18px',
-                borderRadius: 8,
+                  padding: '8px 18px',
+                  borderRadius: 8,
                 border: 'none',
                 background: activeTab === tab ? '#111827' : 'transparent',
                 color: activeTab === tab ? '#fff' : '#6b7280',
-                fontSize: 15,
+                  fontSize: 15,
                 fontWeight: 500,
-                cursor: 'pointer',
-                transition: 'all 0.2s'
+                  cursor: 'pointer',
+                  transition: 'all 0.2s'
               }}
             >
               {tab === 'org' ? 'Org Chart' : tab === 'teams' ? 'Teams' : 'Contacts'}
             </button>
           ))}
+          </div>
         </div>
       </div>
 
@@ -301,51 +340,60 @@ export default function Home() {
           <div style={{ textAlign: 'center' }}>
             
             {/* Primary contacts banner */}
+            {customer.primaryContacts && customer.primaryContacts.length > 0 && (
             <div style={{
               display: 'inline-block',
-              padding: 24,
+                padding: 24,
               background: '#f0fdf4',
-              border: '2px solid #86efac',
-              borderRadius: 12,
-              marginBottom: 40,
-              boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
-            }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: '#166534', marginBottom: 16, letterSpacing: 1.2 }}>PRIMARY CONTACTS</div>
-              <div style={{ display: 'flex', gap: 32 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                  <Avatar name="Katherine Cheng" size={56} isPrimary />
+                border: '2px solid #86efac',
+                borderRadius: 12,
+                marginBottom: 40,
+                boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+              }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: '#166534', marginBottom: 16, letterSpacing: 1.2 }}>PRIMARY CONTACTS</div>
+                <div style={{ display: 'flex', gap: 32, flexWrap: 'wrap', justifyContent: 'center' }}>
+                  {customer.primaryContacts.map((contact, idx) => (
+                    <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                      <Avatar name={contact.name} size={56} isPrimary />
                   <div style={{ textAlign: 'left' }}>
-                    <div style={{ fontSize: 17, fontWeight: 600 }}>Katherine Cheng</div>
-                    <div style={{ fontSize: 14, color: '#6b7280', marginTop: 2 }}>PM, Spending Intelligence</div>
-                    <div style={{ fontSize: 13, color: '#9ca3af', marginTop: 2 }}>katherine@chime.com</div>
-                    <a href="https://www.linkedin.com/in/katherine-cheng-82246258" target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: '#0a66c2', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4, marginTop: 4 }}>
-                      <LinkedInIcon size={16} /> Profile
-                    </a>
+                        <div style={{ fontSize: 17, fontWeight: 600 }}>{contact.name}</div>
+                        <div style={{ fontSize: 14, color: '#6b7280', marginTop: 2 }}>{contact.role}</div>
+                        {contact.email && <div style={{ fontSize: 13, color: '#9ca3af', marginTop: 2 }}>{contact.email}</div>}
+                        {contact.linkedin && (
+                          <a href={contact.linkedin} target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: '#0a66c2', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4, marginTop: 4 }}>
+                            <LinkedInIcon size={16} /> Profile
+                          </a>
+                        )}
                   </div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                  <Avatar name="Ben McClaughry" size={56} isPrimary />
-                  <div style={{ textAlign: 'left' }}>
-                    <div style={{ fontSize: 17, fontWeight: 600 }}>Ben McClaughry</div>
-                    <div style={{ fontSize: 14, color: '#6b7280', marginTop: 2 }}>Business Operations</div>
-                    <div style={{ fontSize: 13, color: '#9ca3af', marginTop: 2 }}>ben.mcclaughry@chime.com</div>
-                    <a href="https://www.linkedin.com/in/benmcclaughry" target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: '#0a66c2', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4, marginTop: 4 }}>
-                      <LinkedInIcon size={16} /> Profile
-                    </a>
-                  </div>
+                  ))}
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Founders */}
-            <SectionLabel>Founders</SectionLabel>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: 48 }}>
-              <PersonCard name="Chris Britt" role="CEO & Co-Founder" linkedin="https://www.linkedin.com/in/cbritt" count={10} isExpanded={expanded.ceo} onToggle={() => toggle('ceo')} />
-              <PersonCard name="Ryan King" role="Co-Founder & Interim CPO" linkedin="https://www.linkedin.com/in/ryanaking" count={1} isExpanded={expanded.ryan} onToggle={() => toggle('ryan')} isInterim />
-            </div>
+            {customer.founders && customer.founders.length > 0 && (
+              <>
+                <SectionLabel>Founders</SectionLabel>
+                <div style={{ display: 'flex', justifyContent: 'center', gap: 48, flexWrap: 'wrap' }}>
+                  {customer.founders.map((founder, idx) => (
+                    <PersonCard 
+                      key={idx}
+                      name={founder.name} 
+                      role={founder.role} 
+                      linkedin={founder.linkedin} 
+                      count={founder.reportsCount || 0} 
+                      isExpanded={expanded[founder.expandKey]} 
+                      onToggle={() => toggle(founder.expandKey)} 
+                      isInterim={founder.isInterim}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
 
             {/* C-Suite */}
-            {expanded.ceo && (
+            {customer.founders && customer.founders.find(f => f.expandKey === 'ceo') && expanded.ceo && customer.cSuite && customer.cSuite.length > 0 && (
               <>
                 <SectionLabel color="#374151">C-Suite (Reports to CEO)</SectionLabel>
                 <div style={{ 
@@ -359,42 +407,56 @@ export default function Home() {
                   background: '#fafafa',
                   borderRadius: 10
                 }}>
-                  {cSuite.map((p, i) => (
-                    <CSuiteCard key={i} name={p.n} role={p.r} linkedin={p.li} />
+                  {customer.cSuite.map((p, i) => (
+                    <CSuiteCard key={i} name={p.name} role={p.role} linkedin={p.linkedin} />
                   ))}
                 </div>
               </>
             )}
 
             {/* Product Organization */}
-            {expanded.ryan && (
+            {customer.orgChart && customer.orgChart.productOrg && customer.founders && customer.founders.find(f => f.expandKey === 'ryan') && expanded.ryan && (
               <>
-                <SectionLabel color="#7c3aed">Product Organization (Reports to Interim CPO)</SectionLabel>
+                <SectionLabel color="#7c3aed">{customer.orgChart.productOrg.label}</SectionLabel>
                 <div style={{ display: 'flex', justifyContent: 'center' }}>
-                  <PersonCard name="Philip McDonnell" role="VP Product (Spending)" linkedin="https://www.linkedin.com/in/philipmcdonnell" count={4} isExpanded={expanded.philip} onToggle={() => toggle('philip')} />
+                  <PersonCard 
+                    name={customer.orgChart.productOrg.person.name} 
+                    role={customer.orgChart.productOrg.person.role} 
+                    linkedin={customer.orgChart.productOrg.person.linkedin} 
+                    count={customer.orgChart.productOrg.person.reportsCount || 0} 
+                    isExpanded={expanded[customer.orgChart.productOrg.person.expandKey]} 
+                    onToggle={() => toggle(customer.orgChart.productOrg.person.expandKey)} 
+                  />
                 </div>
               </>
             )}
 
-            {/* Banking Products Directors */}
-            {expanded.philip && (
+            {/* Directors */}
+            {customer.orgChart && customer.orgChart.productOrg && customer.orgChart.productOrg.directors && expanded.philip && (
               <>
-                <SectionLabel color="#6366f1">Banking Products Directors</SectionLabel>
-                <div style={{ display: 'flex', justifyContent: 'center', gap: 32 }}>
-                  <PersonCard name="Brenden" role="GPM, Spend Better" count={5} isExpanded={expanded.brenden} onToggle={() => toggle('brenden')} />
-                  <PersonCard name="Baishi Wu" role="GPM, Cards" linkedin="https://www.linkedin.com/in/baishi" count={4} isExpanded={expanded.baishi} onToggle={() => toggle('baishi')} />
-                  <PersonCard name="Will Wix" role="Product Operations" linkedin="https://www.linkedin.com/in/will-wix-5846b68b" count={1} isExpanded={expanded.will} onToggle={() => toggle('will')} />
-                  <PersonCard name="Michael Barrett" role="Engineering Lead" linkedin="https://www.linkedin.com/in/michaelebarrett" count={0} />
+                <SectionLabel color="#6366f1">Directors</SectionLabel>
+                <div style={{ display: 'flex', justifyContent: 'center', gap: 32, flexWrap: 'wrap' }}>
+                  {customer.orgChart.productOrg.directors.map((director, idx) => (
+                    <PersonCard 
+                      key={idx}
+                      name={director.name} 
+                      role={director.role} 
+                      linkedin={director.linkedin} 
+                      count={director.reportsCount || 0} 
+                      isExpanded={director.expandKey ? expanded[director.expandKey] : false} 
+                      onToggle={director.expandKey ? () => toggle(director.expandKey) : undefined} 
+                    />
+                  ))}
                 </div>
               </>
             )}
 
             {/* Spend Better Squads */}
-            {expanded.brenden && (
+            {customer.orgChart && customer.orgChart.productOrg && customer.orgChart.productOrg.spendBetterSquads && expanded.brenden && (
               <>
                 <SectionLabel color="#059669">Spend Better Squads</SectionLabel>
                 <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 18 }}>
-                  {squads.spendBetter.map((s, i) => (
+                  {customer.orgChart.productOrg.spendBetterSquads.map((s, i) => (
                     <SquadCard 
                       key={i}
                       squad={s.squad} 
@@ -411,11 +473,11 @@ export default function Home() {
             )}
 
             {/* Cards Squads */}
-            {expanded.baishi && (
+            {customer.orgChart && customer.orgChart.productOrg && customer.orgChart.productOrg.cardsSquads && expanded.baishi && (
               <>
                 <SectionLabel color="#2563eb">Cards Squads</SectionLabel>
                 <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 18 }}>
-                  {squads.cards.map((s, i) => (
+                  {customer.orgChart.productOrg.cardsSquads.map((s, i) => (
                     <SquadCard 
                       key={i}
                       squad={s.squad} 
@@ -432,40 +494,42 @@ export default function Home() {
             )}
 
             {/* Business Ops */}
-            {expanded.will && (
+            {customer.orgChart && customer.orgChart.productOrg && customer.orgChart.productOrg.businessOps && expanded.will && (
               <>
                 <SectionLabel color="#059669">Business Operations</SectionLabel>
                 <div style={{ display: 'flex', justifyContent: 'center' }}>
-                  <PersonCard name="Ben McClaughry" role="Business Operations" email="ben.mcclaughry@chime.com" linkedin="https://www.linkedin.com/in/benmcclaughry" isPrimary />
+                  <PersonCard 
+                    name={customer.orgChart.productOrg.businessOps.name} 
+                    role={customer.orgChart.productOrg.businessOps.role} 
+                    email={customer.orgChart.productOrg.businessOps.email} 
+                    linkedin={customer.orgChart.productOrg.businessOps.linkedin} 
+                    isPrimary={customer.orgChart.productOrg.businessOps.isPrimary} 
+                  />
                 </div>
               </>
             )}
 
             {/* Reporting lines */}
-            <div style={{
-              marginTop: 48,
-              padding: 24,
-              background: '#fafafa',
-              borderRadius: 12,
-              maxWidth: 700,
-              margin: '48px auto 0',
-              textAlign: 'left',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
-            }}>
-              <div style={{ fontSize: 16, fontWeight: 600, color: '#111827', marginBottom: 16 }}>Reporting Lines</div>
-              <div style={{ padding: 16, background: '#f0fdf4', borderRadius: 8, marginBottom: 12, border: '2px solid #bbf7d0' }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: '#166534', marginBottom: 6, letterSpacing: 0.5 }}>PRODUCT LINE</div>
-                <div style={{ fontSize: 14, color: '#374151', lineHeight: 1.6 }}>
-                  Chris Britt → Ryan King (Interim CPO) → Philip McDonnell → Brenden → <strong>Katherine Cheng</strong>
-                </div>
+            {customer.reportingLines && customer.reportingLines.length > 0 && (
+              <div style={{
+                marginTop: 48,
+                padding: 24,
+                background: '#fafafa',
+                borderRadius: 12,
+                maxWidth: 700,
+                margin: '48px auto 0',
+                textAlign: 'left',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+              }}>
+                <div style={{ fontSize: 16, fontWeight: 600, color: '#111827', marginBottom: 16 }}>Reporting Lines</div>
+                {customer.reportingLines.map((line, idx) => (
+                  <div key={idx} style={{ padding: 16, background: line.bgColor, borderRadius: 8, marginBottom: 12, border: `2px solid ${line.borderColor}` }}>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: line.color, marginBottom: 6, letterSpacing: 0.5 }}>{line.label}</div>
+                    <div style={{ fontSize: 14, color: '#374151', lineHeight: 1.6 }} dangerouslySetInnerHTML={{ __html: line.line }} />
+                  </div>
+                ))}
               </div>
-              <div style={{ padding: 16, background: '#eff6ff', borderRadius: 8, border: '2px solid #bfdbfe' }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: '#1e40af', marginBottom: 6, letterSpacing: 0.5 }}>BUSINESS OPS LINE</div>
-                <div style={{ fontSize: 14, color: '#374151', lineHeight: 1.6 }}>
-                  Philip McDonnell → Will Wix → <strong>Ben McClaughry</strong>
-                </div>
-              </div>
-            </div>
+            )}
           </div>
         )}
 
@@ -474,8 +538,8 @@ export default function Home() {
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
               <div style={{ fontSize: 24, fontWeight: 700, color: '#111827' }}>Teams</div>
-              <button
-                onClick={() => downloadCSV(allPeople, 'chime_all_teams.csv')}
+                <button
+                  onClick={() => downloadCSV(allPeople, `${customer.name.toLowerCase()}_all_teams.csv`)}
                 style={{
                   padding: '10px 20px',
                   background: '#10b981',
@@ -585,34 +649,34 @@ export default function Home() {
               </div>
               
               <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                <div style={{ display: 'flex', background: '#f3f4f6', borderRadius: 8, padding: 4 }}>
-                  <button
-                    onClick={() => setContactFilter('cardswitcher')}
-                    style={{
+              <div style={{ display: 'flex', background: '#f3f4f6', borderRadius: 8, padding: 4 }}>
+                <button
+                  onClick={() => setContactFilter('cardswitcher')}
+                  style={{
                       padding: '8px 16px',
-                      borderRadius: 6,
-                      border: 'none',
-                      background: contactFilter === 'cardswitcher' ? '#fff' : 'transparent',
-                      color: contactFilter === 'cardswitcher' ? '#111827' : '#6b7280',
+                    borderRadius: 6,
+                    border: 'none',
+                    background: contactFilter === 'cardswitcher' ? '#fff' : 'transparent',
+                    color: contactFilter === 'cardswitcher' ? '#111827' : '#6b7280',
                       fontSize: 14,
-                      fontWeight: 500,
-                      cursor: 'pointer',
+                    fontWeight: 500,
+                    cursor: 'pointer',
                       boxShadow: contactFilter === 'cardswitcher' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
                       transition: 'all 0.2s'
-                    }}
-                  >
-                    CardSwitcher
-                  </button>
-                  <button
-                    onClick={() => setContactFilter('all')}
-                    style={{
+                  }}
+                >
+                  CardSwitcher
+                </button>
+                <button
+                  onClick={() => setContactFilter('all')}
+                  style={{
                       padding: '8px 16px',
-                      borderRadius: 6,
-                      border: 'none',
-                      background: contactFilter === 'all' ? '#fff' : 'transparent',
-                      color: contactFilter === 'all' ? '#111827' : '#6b7280',
+                    borderRadius: 6,
+                    border: 'none',
+                    background: contactFilter === 'all' ? '#fff' : 'transparent',
+                    color: contactFilter === 'all' ? '#111827' : '#6b7280',
                       fontSize: 14,
-                      fontWeight: 500,
+                    fontWeight: 500,
                       cursor: 'pointer',
                       boxShadow: contactFilter === 'all' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
                       transition: 'all 0.2s'
