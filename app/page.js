@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { contacts, cSuite as cSuiteData, squads, downloadCSV } from '../lib/data';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState('org');
@@ -17,7 +18,7 @@ export default function Home() {
   const toggle = (id) => setExpanded(prev => ({ ...prev, [id]: !prev[id] }));
 
   // LinkedIn icon
-  const LinkedInIcon = ({ size = 14 }) => (
+  const LinkedInIcon = ({ size = 18 }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="#0a66c2">
       <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
     </svg>
@@ -51,10 +52,10 @@ export default function Home() {
             right: -2,
             background: '#f59e0b',
             color: '#fff',
-            fontSize: 7,
+            fontSize: 10,
             fontWeight: 700,
-            padding: '2px 4px',
-            borderRadius: 3
+            padding: '3px 6px',
+            borderRadius: 4
           }}>INT</div>
         )}
       </div>
@@ -74,18 +75,21 @@ export default function Home() {
         style={{
           display: 'inline-flex',
           alignItems: 'center',
-          gap: 3,
+          gap: 4,
           background: '#0a66c2',
           color: '#fff',
-          padding: '3px 8px',
-          borderRadius: 4,
-          fontSize: 10,
+          padding: '6px 12px',
+          borderRadius: 6,
+          fontSize: 13,
           fontWeight: 500,
           textDecoration: 'none',
-          marginTop: 4
+          marginTop: 6,
+          transition: 'background 0.2s'
         }}
+        onMouseEnter={(e) => e.target.style.background = '#095195'}
+        onMouseLeave={(e) => e.target.style.background = '#0a66c2'}
       >
-        <LinkedInIcon size={10} />
+        <LinkedInIcon size={14} />
         <span style={{ color: '#fff' }}>LinkedIn</span>
       </a>
     );
@@ -97,27 +101,31 @@ export default function Home() {
       background: '#2563eb',
       color: '#fff',
       border: 'none',
-      borderRadius: 10,
-      padding: '3px 8px',
-      fontSize: 11,
+      borderRadius: 8,
+      padding: '6px 12px',
+      fontSize: 14,
       fontWeight: 600,
       cursor: 'pointer',
       display: 'inline-flex',
       alignItems: 'center',
-      gap: 3,
-      marginTop: 6
-    }}>
-      {count}<span style={{ fontSize: 8 }}>{isExpanded ? '▲' : '▼'}</span>
+      gap: 4,
+      marginTop: 8,
+      transition: 'background 0.2s'
+    }}
+    onMouseEnter={(e) => e.target.style.background = '#1d4ed8'}
+    onMouseLeave={(e) => e.target.style.background = '#2563eb'}
+    >
+      {count}<span style={{ fontSize: 10, marginLeft: 2 }}>{isExpanded ? '▲' : '▼'}</span>
     </button>
   );
 
   // Person card
   const PersonCard = ({ name, role, email, linkedin, count, isExpanded, onToggle, isPrimary, isInterim }) => (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: 120 }}>
-      <Avatar name={name} isPrimary={isPrimary} isInterim={isInterim} />
-      <div style={{ marginTop: 8, textAlign: 'center' }}>
-        <div style={{ fontSize: 12, fontWeight: 600, color: '#111827', lineHeight: 1.3 }}>{name}</div>
-        <div style={{ fontSize: 10, color: '#6b7280', marginTop: 2 }}>{role}</div>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: 160 }}>
+      <Avatar name={name} isPrimary={isPrimary} isInterim={isInterim} size={72} />
+      <div style={{ marginTop: 12, textAlign: 'center' }}>
+        <div style={{ fontSize: 16, fontWeight: 600, color: '#111827', lineHeight: 1.4 }}>{name}</div>
+        <div style={{ fontSize: 13, color: '#6b7280', marginTop: 4 }}>{role}</div>
         <LinkedInBtn url={linkedin} />
       </div>
       {count > 0 && <ExpandBtn count={count} isExpanded={isExpanded} onClick={onToggle} />}
@@ -128,35 +136,36 @@ export default function Home() {
   const SquadCard = ({ squad, pm, pmLinkedin, em, emLinkedin, isPrimary, email }) => (
     <div style={{
       background: isPrimary ? '#f0fdf4' : '#fff',
-      border: `1px solid ${isPrimary ? '#86efac' : '#e5e7eb'}`,
-      borderRadius: 10,
-      padding: 14,
-      width: 170
+      border: `2px solid ${isPrimary ? '#86efac' : '#e5e7eb'}`,
+      borderRadius: 12,
+      padding: 20,
+      width: 220,
+      boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
     }}>
-      <div style={{ fontSize: 9, fontWeight: 600, color: '#6b7280', marginBottom: 10, letterSpacing: 0.5, textAlign: 'center' }}>
+      <div style={{ fontSize: 12, fontWeight: 700, color: '#6b7280', marginBottom: 14, letterSpacing: 0.5, textAlign: 'center' }}>
         {squad.toUpperCase()}
       </div>
       <div style={{ textAlign: 'center' }}>
-        <Avatar name={pm} size={44} isPrimary={isPrimary} />
-        <div style={{ marginTop: 8 }}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: '#111827' }}>{pm}</div>
-          <div style={{ fontSize: 10, color: '#6b7280' }}>Product Manager</div>
-          {email && <div style={{ fontSize: 8, color: '#9ca3af', marginTop: 2 }}>{email}</div>}
+        <Avatar name={pm} size={56} isPrimary={isPrimary} />
+        <div style={{ marginTop: 12 }}>
+          <div style={{ fontSize: 15, fontWeight: 600, color: '#111827' }}>{pm}</div>
+          <div style={{ fontSize: 13, color: '#6b7280', marginTop: 2 }}>Product Manager</div>
+          {email && <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 4 }}>{email}</div>}
           <LinkedInBtn url={pmLinkedin} />
         </div>
       </div>
       {em && (
-        <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid #e5e7eb', display: 'flex', alignItems: 'center', gap: 6 }}>
-          <Avatar name={em} size={28} />
+        <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid #e5e7eb', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <Avatar name={em} size={40} />
           <div>
-            <div style={{ fontSize: 11, fontWeight: 500, color: '#374151' }}>{em}</div>
-            <div style={{ fontSize: 9, color: '#6b7280' }}>Eng Manager</div>
+            <div style={{ fontSize: 14, fontWeight: 500, color: '#374151' }}>{em}</div>
+            <div style={{ fontSize: 12, color: '#6b7280' }}>Eng Manager</div>
             {emLinkedin && (
               <a 
                 href={emLinkedin.startsWith('http') ? emLinkedin : `https://${emLinkedin}`} 
                 target="_blank" 
                 rel="noopener noreferrer"
-                style={{ fontSize: 9, color: '#0a66c2', textDecoration: 'none' }}
+                style={{ fontSize: 12, color: '#0a66c2', textDecoration: 'none', marginTop: 2, display: 'inline-block' }}
               >
                 LinkedIn →
               </a>
@@ -170,22 +179,22 @@ export default function Home() {
   // Section label
   const SectionLabel = ({ children, color = '#6b7280' }) => (
     <div style={{
-      fontSize: 10,
-      fontWeight: 600,
+      fontSize: 14,
+      fontWeight: 700,
       color,
-      letterSpacing: 1,
+      letterSpacing: 1.2,
       textTransform: 'uppercase',
-      margin: '28px 0 16px',
+      margin: '36px 0 20px',
       textAlign: 'center'
     }}>{children}</div>
   );
 
   // C-Suite card
   const CSuiteCard = ({ name, role, linkedin }) => (
-    <div style={{ textAlign: 'center', width: 100 }}>
-      <Avatar name={name} size={44} />
-      <div style={{ fontSize: 11, fontWeight: 600, color: '#111827', marginTop: 6 }}>{name}</div>
-      <div style={{ fontSize: 9, color: '#6b7280' }}>{role}</div>
+    <div style={{ textAlign: 'center', width: 140 }}>
+      <Avatar name={name} size={56} />
+      <div style={{ fontSize: 14, fontWeight: 600, color: '#111827', marginTop: 8 }}>{name}</div>
+      <div style={{ fontSize: 12, color: '#6b7280', marginTop: 2 }}>{role}</div>
       {linkedin && (
         <a 
           href={linkedin.startsWith('http') ? linkedin : `https://${linkedin}`} 
@@ -194,14 +203,14 @@ export default function Home() {
           style={{ 
             display: 'inline-flex',
             alignItems: 'center',
-            gap: 2,
-            fontSize: 9, 
+            gap: 4,
+            fontSize: 12, 
             color: '#0a66c2', 
             textDecoration: 'none',
-            marginTop: 4
+            marginTop: 6
           }}
         >
-          <LinkedInIcon size={10} />
+          <LinkedInIcon size={14} />
           Profile
         </a>
       )}
@@ -209,64 +218,20 @@ export default function Home() {
   );
 
   // All people data
-  const allPeople = [
-    { name: 'Chris Britt', role: 'CEO & Co-Founder', team: 'Executive Leadership', email: 'cb@chime.com', linkedin: 'https://www.linkedin.com/in/cbritt', cardswitcher: false },
-    { name: 'Ryan King', role: 'Co-Founder & Interim CPO', team: 'Executive Leadership', email: 'rk@chime.com', linkedin: 'https://www.linkedin.com/in/ryanaking', cardswitcher: false },
-    { name: 'Mark Troughton', role: 'President', team: 'Executive Leadership', email: 'mtroughton@chime.com', linkedin: 'https://www.linkedin.com/in/matroughton', cardswitcher: false },
-    { name: 'Janelle Sallenave', role: 'COO', team: 'Executive Leadership', email: 'janelle.sallenave@chime.com', linkedin: 'https://www.linkedin.com/in/janelle-sallenave-489416', cardswitcher: false },
-    { name: 'Matt Newcomb', role: 'CFO', team: 'Executive Leadership', email: 'matt@chimebank.com', linkedin: 'https://www.linkedin.com/in/matthewsnewcomb', cardswitcher: false },
-    { name: 'Jeff Currier', role: 'CTO', team: 'Executive Leadership', email: 'jcurrier@chime.com', linkedin: 'https://www.linkedin.com/in/jeff-currier', cardswitcher: false },
-    { name: 'Vineet Mehra', role: 'CGO', team: 'Executive Leadership', email: 'vineet.mehra@chime.com', linkedin: 'https://www.linkedin.com/in/vineetmehra1', cardswitcher: false },
-    { name: 'Sarah Wagener', role: 'Chief People Officer', team: 'Executive Leadership', email: 'sarah.wagener@chime.com', linkedin: 'linkedin.com/in/sarah-collins-wagener', cardswitcher: false },
-    { name: 'Adam Frankel', role: 'General Counsel', team: 'Executive Leadership', email: 'adam.frankel@chime.com', linkedin: 'https://linkedin.com/in/adam-spencer-frankel-2ba72616', cardswitcher: false },
-    { name: 'Xiongwen Rui', role: 'Chief Risk Officer', team: 'Executive Leadership', email: 'xiongwen.rui@chime.com', linkedin: 'https://www.linkedin.com/in/xiongwenrui', cardswitcher: false },
-    { name: 'Jennifer Kuperman', role: 'Chief Corporate Affairs', team: 'Executive Leadership', email: 'jennifer.kuperman@chime.com', linkedin: 'linkedin.com/in/jenniferkuperman', cardswitcher: false },
-    { name: 'Barkha Saxena', role: 'Chief Data Officer', team: 'Executive Leadership', email: 'barkha.saxena@chime.com', linkedin: 'https://www.linkedin.com/in/barkhasaxena', cardswitcher: false },
-    { name: 'Philip McDonnell', role: 'VP Product (Spending)', team: 'Banking Products', email: 'philip.mcdonnell@chime.com', linkedin: 'https://www.linkedin.com/in/philipmcdonnell', cardswitcher: true },
-    { name: 'Michael Barrett', role: 'Engineering Lead', team: 'Banking Products', email: 'michael.barrett@chime.com', linkedin: 'https://www.linkedin.com/in/michaelebarrett', cardswitcher: false },
-    { name: 'Will Wix', role: 'Product Operations', team: 'Product Operations', email: 'will@chimebank.com', linkedin: 'https://www.linkedin.com/in/will-wix-5846b68b', cardswitcher: true },
-    { name: 'Priya Raghuram', role: 'Engineering Management', team: 'Engineering', email: 'pr@chimebank.com', linkedin: 'linkedin.com/in/the-priya-raghuram', cardswitcher: false },
-    { name: 'Jake Ford', role: 'OMX', team: 'Banking Products', email: 'jake.ford@chime.com', linkedin: 'linkedin.com/in/jacobford44', cardswitcher: false },
-    { name: 'Caylee Betts', role: 'Design', team: 'Design', email: 'caylee.betts@chime.com', linkedin: 'https://www.linkedin.com/in/cayleebetts', cardswitcher: false },
-    { name: 'Jon Moffitt', role: 'Marketing', team: 'Marketing', email: 'jon.moffitt@chime.com', linkedin: 'https://linkedin.com/in/jonmoffitt', cardswitcher: false },
-    { name: 'Jeannie DeLoach', role: 'User Research', team: 'Design', email: 'jeannie.deloach@chime.com', linkedin: 'https://www.linkedin.com/in/jeandeloach', cardswitcher: false },
-    { name: 'Jaclyn Dinh', role: 'Analytics', team: 'Analytics', email: 'jaclyn.dinh@chime.com', linkedin: 'https://www.linkedin.com/in/jchaunguyen', cardswitcher: false },
-    { name: 'Brenden', role: 'GPM/PM Director, Spend Better', team: 'Spend Better', email: '', linkedin: '', cardswitcher: true },
-    { name: 'Baishi Wu', role: 'GPM/PM Director, Cards', team: 'Cards', email: 'bwu@chime.com', linkedin: 'https://www.linkedin.com/in/baishi', cardswitcher: false },
-    { name: 'Katherine Cheng', role: 'PM, Spending Intelligence', team: 'Spend Better', email: 'katherine@chime.com', linkedin: 'https://www.linkedin.com/in/katherine-cheng-82246258', cardswitcher: true, isPrimary: true },
-    { name: 'William Stern', role: 'PM, Deals & Offers', team: 'Spend Better', email: 'william.stern@chime.com', linkedin: 'https://www.linkedin.com/in/william-stern-22bb9a84', cardswitcher: false },
-    { name: 'Mitch Ginsburg', role: 'PM, Save & Invest', team: 'Spend Better', email: 'mitch.ginsburg@chime.com', linkedin: 'https://www.linkedin.com/in/mginsburg', cardswitcher: false },
-    { name: 'Cliff Canan', role: 'PM, Money Out & Credit', team: 'Spend Better', email: 'cliff.canan@chime.com', linkedin: 'https://www.linkedin.com/in/cliffcanan', cardswitcher: false },
-    { name: 'Dilip Ramacha', role: 'PM, Multiplay', team: 'Spend Better', email: '', linkedin: '', cardswitcher: false },
-    { name: 'Adyant Kanakamedala', role: 'PM, Cards-Success', team: 'Cards', email: 'adyant.kanakamedala@chime.com', linkedin: 'linkedin.com/in/adyantvk', cardswitcher: false },
-    { name: 'Martin Williams', role: 'PM, Cards Experience', team: 'Cards', email: 'martin.williams@chime.com', linkedin: 'https://linkedin.com/in/martinjwilliams1', cardswitcher: false },
-    { name: 'Anuj Khemka', role: 'PM, Unsecured', team: 'Cards', email: 'anuj.khemka@chime.com', linkedin: '', cardswitcher: false },
-    { name: 'Allison Iakovlev', role: 'PM, Secured', team: 'Cards', email: '', linkedin: 'https://www.linkedin.com/in/allison-iakovlev', cardswitcher: false },
-    { name: 'Xianxin Huang', role: 'EM, Spending Intelligence', team: 'Spend Better', email: 'xianxin.huang@chime.com', linkedin: 'https://www.linkedin.com/in/xianxin-huang-22673229', cardswitcher: true },
-    { name: 'Bhavya Kashyap', role: 'EM, Deals & Offers', team: 'Spend Better', email: 'bhavya.kashyap@chime.com', linkedin: 'https://www.linkedin.com/in/bhavya-kashyap', cardswitcher: false },
-    { name: 'Ziad Abdo', role: 'EM, Save & Invest', team: 'Spend Better', email: 'zabdo@chime.com', linkedin: 'https://www.linkedin.com/in/ziadabdo', cardswitcher: true },
-    { name: 'Joshua Sacks', role: 'EM, Cards', team: 'Cards', email: 'joshua.sacks@chime.com', linkedin: 'https://www.linkedin.com/in/jmsacks', cardswitcher: false },
-    { name: 'Ben McClaughry', role: 'Business Operations', team: 'Product Operations', email: 'ben.mcclaughry@chime.com', linkedin: 'https://www.linkedin.com/in/benmcclaughry', cardswitcher: true, isPrimary: true },
-    { name: 'Jon Fulton', role: 'Product/UX Lead', team: 'Product', email: 'jfulton@chime.com', linkedin: 'https://www.linkedin.com/in/jonfultonsfo', cardswitcher: true },
-    { name: 'Tom Connors', role: 'Engineer', team: 'Engineering', email: 'tom.connors@chime.com', linkedin: 'https://linkedin.com/in/tom-connors-3967921', cardswitcher: true },
-    { name: 'Eliza Zhu', role: 'Security Risk Governance', team: 'Compliance', email: 'eliza.zhu@chime.com', linkedin: 'https://www.linkedin.com/in/eliza-zhu', cardswitcher: true },
-  ];
+  const allPeople = contacts;
 
   const teams = [...new Set(allPeople.map(p => p.team))];
   const filteredContacts = contactFilter === 'all' ? allPeople : allPeople.filter(p => p.cardswitcher);
 
-  const cSuite = [
-    { n: 'Mark Troughton', r: 'President', li: 'https://www.linkedin.com/in/matroughton' },
-    { n: 'Janelle Sallenave', r: 'COO', li: 'https://www.linkedin.com/in/janelle-sallenave-489416' },
-    { n: 'Matt Newcomb', r: 'CFO', li: 'https://www.linkedin.com/in/matthewsnewcomb' },
-    { n: 'Jeff Currier', r: 'CTO', li: 'https://www.linkedin.com/in/jeff-currier' },
-    { n: 'Vineet Mehra', r: 'CGO', li: 'https://www.linkedin.com/in/vineetmehra1' },
-    { n: 'Sarah Wagener', r: 'CPO', li: 'linkedin.com/in/sarah-collins-wagener' },
-    { n: 'Adam Frankel', r: 'General Counsel', li: 'https://linkedin.com/in/adam-spencer-frankel-2ba72616' },
-    { n: 'Xiongwen Rui', r: 'CRO', li: 'https://www.linkedin.com/in/xiongwenrui' },
-    { n: 'Jennifer Kuperman', r: 'Corp Affairs', li: 'linkedin.com/in/jenniferkuperman' },
-    { n: 'Barkha Saxena', r: 'CDO', li: 'https://www.linkedin.com/in/barkhasaxena' },
-  ];
+  // Format cSuite data
+  const cSuite = cSuiteData.map(c => ({ n: c.name, r: c.role, li: c.linkedin }));
+
+  // CSV Export handler
+  const handleExportCSV = () => {
+    const dataToExport = contactFilter === 'all' ? allPeople : filteredContacts;
+    const filename = contactFilter === 'all' ? 'chime_all_contacts.csv' : 'chime_cardswitcher_contacts.csv';
+    downloadCSV(dataToExport, filename);
+  };
 
   return (
     <div style={{ 
@@ -276,15 +241,16 @@ export default function Home() {
     }}>
       {/* Header */}
       <div style={{
-        borderBottom: '1px solid #e5e7eb',
-        padding: '14px 24px',
+        borderBottom: '2px solid #e5e7eb',
+        padding: '18px 32px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         position: 'sticky',
         top: 0,
         background: '#fff',
-        zIndex: 100
+        zIndex: 100,
+        boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{
@@ -300,8 +266,8 @@ export default function Home() {
             fontSize: 14
           }}>C</div>
           <div>
-            <div style={{ fontSize: 15, fontWeight: 700, color: '#111827' }}>Chime</div>
-            <div style={{ fontSize: 11, color: '#6b7280' }}>Banking Products Division</div>
+            <div style={{ fontSize: 20, fontWeight: 700, color: '#111827' }}>Chime</div>
+            <div style={{ fontSize: 14, color: '#6b7280' }}>Banking Products Division</div>
           </div>
         </div>
         
@@ -311,14 +277,15 @@ export default function Home() {
               key={tab}
               onClick={() => setActiveTab(tab)}
               style={{
-                padding: '6px 14px',
-                borderRadius: 6,
+                padding: '8px 18px',
+                borderRadius: 8,
                 border: 'none',
                 background: activeTab === tab ? '#111827' : 'transparent',
                 color: activeTab === tab ? '#fff' : '#6b7280',
-                fontSize: 13,
+                fontSize: 15,
                 fontWeight: 500,
-                cursor: 'pointer'
+                cursor: 'pointer',
+                transition: 'all 0.2s'
               }}
             >
               {tab === 'org' ? 'Org Chart' : tab === 'teams' ? 'Teams' : 'Contacts'}
@@ -327,7 +294,7 @@ export default function Home() {
         </div>
       </div>
 
-      <div style={{ padding: '24px 32px' }}>
+      <div style={{ padding: '32px 40px', maxWidth: '1400px', margin: '0 auto' }}>
         
         {/* ORG CHART TAB */}
         {activeTab === 'org' && (
@@ -336,33 +303,34 @@ export default function Home() {
             {/* Primary contacts banner */}
             <div style={{
               display: 'inline-block',
-              padding: 16,
+              padding: 24,
               background: '#f0fdf4',
-              border: '1px solid #86efac',
-              borderRadius: 10,
-              marginBottom: 32
+              border: '2px solid #86efac',
+              borderRadius: 12,
+              marginBottom: 40,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
             }}>
-              <div style={{ fontSize: 9, fontWeight: 600, color: '#166534', marginBottom: 12, letterSpacing: 1 }}>PRIMARY CONTACTS</div>
-              <div style={{ display: 'flex', gap: 24 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <Avatar name="Katherine Cheng" size={40} isPrimary />
+              <div style={{ fontSize: 12, fontWeight: 700, color: '#166534', marginBottom: 16, letterSpacing: 1.2 }}>PRIMARY CONTACTS</div>
+              <div style={{ display: 'flex', gap: 32 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                  <Avatar name="Katherine Cheng" size={56} isPrimary />
                   <div style={{ textAlign: 'left' }}>
-                    <div style={{ fontSize: 13, fontWeight: 600 }}>Katherine Cheng</div>
-                    <div style={{ fontSize: 11, color: '#6b7280' }}>PM, Spending Intelligence</div>
-                    <div style={{ fontSize: 10, color: '#9ca3af' }}>katherine@chime.com</div>
-                    <a href="https://www.linkedin.com/in/katherine-cheng-82246258" target="_blank" rel="noopener noreferrer" style={{ fontSize: 10, color: '#0a66c2', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 3, marginTop: 2 }}>
-                      <LinkedInIcon size={12} /> Profile
+                    <div style={{ fontSize: 17, fontWeight: 600 }}>Katherine Cheng</div>
+                    <div style={{ fontSize: 14, color: '#6b7280', marginTop: 2 }}>PM, Spending Intelligence</div>
+                    <div style={{ fontSize: 13, color: '#9ca3af', marginTop: 2 }}>katherine@chime.com</div>
+                    <a href="https://www.linkedin.com/in/katherine-cheng-82246258" target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: '#0a66c2', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4, marginTop: 4 }}>
+                      <LinkedInIcon size={16} /> Profile
                     </a>
                   </div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <Avatar name="Ben McClaughry" size={40} isPrimary />
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                  <Avatar name="Ben McClaughry" size={56} isPrimary />
                   <div style={{ textAlign: 'left' }}>
-                    <div style={{ fontSize: 13, fontWeight: 600 }}>Ben McClaughry</div>
-                    <div style={{ fontSize: 11, color: '#6b7280' }}>Business Operations</div>
-                    <div style={{ fontSize: 10, color: '#9ca3af' }}>ben.mcclaughry@chime.com</div>
-                    <a href="https://www.linkedin.com/in/benmcclaughry" target="_blank" rel="noopener noreferrer" style={{ fontSize: 10, color: '#0a66c2', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 3, marginTop: 2 }}>
-                      <LinkedInIcon size={12} /> Profile
+                    <div style={{ fontSize: 17, fontWeight: 600 }}>Ben McClaughry</div>
+                    <div style={{ fontSize: 14, color: '#6b7280', marginTop: 2 }}>Business Operations</div>
+                    <div style={{ fontSize: 13, color: '#9ca3af', marginTop: 2 }}>ben.mcclaughry@chime.com</div>
+                    <a href="https://www.linkedin.com/in/benmcclaughry" target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: '#0a66c2', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4, marginTop: 4 }}>
+                      <LinkedInIcon size={16} /> Profile
                     </a>
                   </div>
                 </div>
@@ -425,12 +393,19 @@ export default function Home() {
             {expanded.brenden && (
               <>
                 <SectionLabel color="#059669">Spend Better Squads</SectionLabel>
-                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 14 }}>
-                  <SquadCard squad="Spending Intelligence" pm="Katherine Cheng" pmLinkedin="https://www.linkedin.com/in/katherine-cheng-82246258" em="Xianxin Huang" emLinkedin="https://www.linkedin.com/in/xianxin-huang-22673229" isPrimary email="katherine@chime.com" />
-                  <SquadCard squad="Deals & Offers" pm="William Stern" pmLinkedin="https://www.linkedin.com/in/william-stern-22bb9a84" em="Bhavya Kashyap" emLinkedin="https://www.linkedin.com/in/bhavya-kashyap" />
-                  <SquadCard squad="Save & Invest" pm="Mitch Ginsburg" pmLinkedin="https://www.linkedin.com/in/mginsburg" em="Ziad Abdo" emLinkedin="https://www.linkedin.com/in/ziadabdo" />
-                  <SquadCard squad="Money Out & Credit" pm="Cliff Canan" pmLinkedin="https://www.linkedin.com/in/cliffcanan" />
-                  <SquadCard squad="Multiplay" pm="Dilip Ramacha" />
+                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 18 }}>
+                  {squads.spendBetter.map((s, i) => (
+                    <SquadCard 
+                      key={i}
+                      squad={s.squad} 
+                      pm={s.pm} 
+                      pmLinkedin={s.pmLinkedin} 
+                      em={s.em} 
+                      emLinkedin={s.emLinkedin} 
+                      isPrimary={s.isPrimary} 
+                      email={s.email} 
+                    />
+                  ))}
                 </div>
               </>
             )}
@@ -439,11 +414,19 @@ export default function Home() {
             {expanded.baishi && (
               <>
                 <SectionLabel color="#2563eb">Cards Squads</SectionLabel>
-                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 14 }}>
-                  <SquadCard squad="Cards-Success" pm="Adyant Kanakamedala" pmLinkedin="linkedin.com/in/adyantvk" em="Joshua Sacks" emLinkedin="https://www.linkedin.com/in/jmsacks" />
-                  <SquadCard squad="Cards Experience" pm="Martin Williams" pmLinkedin="https://linkedin.com/in/martinjwilliams1" em="Joshua Sacks" emLinkedin="https://www.linkedin.com/in/jmsacks" />
-                  <SquadCard squad="Unsecured" pm="Anuj Khemka" />
-                  <SquadCard squad="Secured" pm="Allison Iakovlev" pmLinkedin="https://www.linkedin.com/in/allison-iakovlev" />
+                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 18 }}>
+                  {squads.cards.map((s, i) => (
+                    <SquadCard 
+                      key={i}
+                      squad={s.squad} 
+                      pm={s.pm} 
+                      pmLinkedin={s.pmLinkedin} 
+                      em={s.em} 
+                      emLinkedin={s.emLinkedin} 
+                      isPrimary={s.isPrimary} 
+                      email={s.email} 
+                    />
+                  ))}
                 </div>
               </>
             )}
@@ -460,24 +443,25 @@ export default function Home() {
 
             {/* Reporting lines */}
             <div style={{
-              marginTop: 40,
-              padding: 20,
+              marginTop: 48,
+              padding: 24,
               background: '#fafafa',
-              borderRadius: 10,
-              maxWidth: 600,
-              margin: '40px auto 0',
-              textAlign: 'left'
+              borderRadius: 12,
+              maxWidth: 700,
+              margin: '48px auto 0',
+              textAlign: 'left',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
             }}>
-              <div style={{ fontSize: 12, fontWeight: 600, color: '#111827', marginBottom: 14 }}>Reporting Lines</div>
-              <div style={{ padding: 12, background: '#f0fdf4', borderRadius: 6, marginBottom: 10, border: '1px solid #bbf7d0' }}>
-                <div style={{ fontSize: 9, fontWeight: 600, color: '#166534', marginBottom: 4 }}>PRODUCT LINE</div>
-                <div style={{ fontSize: 11, color: '#374151' }}>
+              <div style={{ fontSize: 16, fontWeight: 600, color: '#111827', marginBottom: 16 }}>Reporting Lines</div>
+              <div style={{ padding: 16, background: '#f0fdf4', borderRadius: 8, marginBottom: 12, border: '2px solid #bbf7d0' }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#166534', marginBottom: 6, letterSpacing: 0.5 }}>PRODUCT LINE</div>
+                <div style={{ fontSize: 14, color: '#374151', lineHeight: 1.6 }}>
                   Chris Britt → Ryan King (Interim CPO) → Philip McDonnell → Brenden → <strong>Katherine Cheng</strong>
                 </div>
               </div>
-              <div style={{ padding: 12, background: '#eff6ff', borderRadius: 6, border: '1px solid #bfdbfe' }}>
-                <div style={{ fontSize: 9, fontWeight: 600, color: '#1e40af', marginBottom: 4 }}>BUSINESS OPS LINE</div>
-                <div style={{ fontSize: 11, color: '#374151' }}>
+              <div style={{ padding: 16, background: '#eff6ff', borderRadius: 8, border: '2px solid #bfdbfe' }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#1e40af', marginBottom: 6, letterSpacing: 0.5 }}>BUSINESS OPS LINE</div>
+                <div style={{ fontSize: 14, color: '#374151', lineHeight: 1.6 }}>
                   Philip McDonnell → Will Wix → <strong>Ben McClaughry</strong>
                 </div>
               </div>
@@ -488,62 +472,92 @@ export default function Home() {
         {/* TEAMS TAB */}
         {activeTab === 'teams' && (
           <div>
-            <div style={{ fontSize: 18, fontWeight: 700, color: '#111827', marginBottom: 24 }}>Teams</div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+              <div style={{ fontSize: 24, fontWeight: 700, color: '#111827' }}>Teams</div>
+              <button
+                onClick={() => downloadCSV(allPeople, 'chime_all_teams.csv')}
+                style={{
+                  padding: '10px 20px',
+                  background: '#10b981',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 8,
+                  fontSize: 14,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  transition: 'background 0.2s'
+                }}
+                onMouseEnter={(e) => e.target.style.background = '#059669'}
+                onMouseLeave={(e) => e.target.style.background = '#10b981'}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Export as CSV
+              </button>
+            </div>
             
             {teams.map((team, i) => {
               const teamMembers = allPeople.filter(p => p.team === team);
               return (
                 <div key={i} style={{ marginBottom: 32 }}>
                   <div style={{ 
-                    fontSize: 13, 
+                    fontSize: 16, 
                     fontWeight: 600, 
                     color: '#374151', 
-                    marginBottom: 12,
+                    marginBottom: 14,
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 8
+                    gap: 10
                   }}>
                     {team}
                     <span style={{ 
                       background: '#e5e7eb', 
                       color: '#6b7280', 
-                      fontSize: 11, 
-                      padding: '2px 8px', 
-                      borderRadius: 10 
+                      fontSize: 13, 
+                      padding: '4px 10px', 
+                      borderRadius: 12,
+                      fontWeight: 500
                     }}>
                       {teamMembers.length}
                     </span>
                   </div>
                   <div style={{ 
                     border: '1px solid #e5e7eb', 
-                    borderRadius: 8, 
-                    overflow: 'hidden'
+                    borderRadius: 10, 
+                    overflow: 'hidden',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
                   }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 15 }}>
                       <thead>
                         <tr style={{ background: '#f9fafb' }}>
-                          <th style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 600, color: '#6b7280', fontSize: 11 }}>NAME</th>
-                          <th style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 600, color: '#6b7280', fontSize: 11 }}>ROLE</th>
-                          <th style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 600, color: '#6b7280', fontSize: 11 }}>EMAIL</th>
-                          <th style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 600, color: '#6b7280', fontSize: 11 }}>LINKEDIN</th>
+                          <th style={{ padding: '14px 18px', textAlign: 'left', fontWeight: 600, color: '#6b7280', fontSize: 12, letterSpacing: 0.5 }}>NAME</th>
+                          <th style={{ padding: '14px 18px', textAlign: 'left', fontWeight: 600, color: '#6b7280', fontSize: 12, letterSpacing: 0.5 }}>ROLE</th>
+                          <th style={{ padding: '14px 18px', textAlign: 'left', fontWeight: 600, color: '#6b7280', fontSize: 12, letterSpacing: 0.5 }}>EMAIL</th>
+                          <th style={{ padding: '14px 18px', textAlign: 'left', fontWeight: 600, color: '#6b7280', fontSize: 12, letterSpacing: 0.5 }}>LINKEDIN</th>
                         </tr>
                       </thead>
                       <tbody>
                         {teamMembers.map((p, j) => (
                           <tr key={j} style={{ borderTop: '1px solid #e5e7eb' }}>
-                            <td style={{ padding: '10px 14px' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                                <Avatar name={p.name} size={32} isPrimary={p.isPrimary} />
-                                <span style={{ fontWeight: 500 }}>{p.name}</span>
-                                {p.isPrimary && <span style={{ background: '#10b981', color: '#fff', fontSize: 9, padding: '2px 6px', borderRadius: 4, fontWeight: 600 }}>PRIMARY</span>}
+                            <td style={{ padding: '12px 18px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                <Avatar name={p.name} size={40} isPrimary={p.isPrimary} />
+                                <span style={{ fontWeight: 500, fontSize: 15 }}>{p.name}</span>
+                                {p.isPrimary && <span style={{ background: '#10b981', color: '#fff', fontSize: 11, padding: '3px 8px', borderRadius: 4, fontWeight: 600 }}>PRIMARY</span>}
                               </div>
                             </td>
-                            <td style={{ padding: '10px 14px', color: '#6b7280' }}>{p.role}</td>
-                            <td style={{ padding: '10px 14px', color: '#6b7280', fontFamily: 'monospace', fontSize: 12 }}>{p.email || '—'}</td>
-                            <td style={{ padding: '10px 14px', color: '#6b7280' }}>
+                            <td style={{ padding: '12px 18px', color: '#6b7280', fontSize: 15 }}>{p.role}</td>
+                            <td style={{ padding: '12px 18px', color: '#6b7280', fontFamily: 'monospace', fontSize: 14 }}>{p.email || '—'}</td>
+                            <td style={{ padding: '12px 18px', color: '#6b7280' }}>
                               {p.linkedin ? (
-                                <a href={p.linkedin.startsWith('http') ? p.linkedin : `https://${p.linkedin}`} target="_blank" rel="noopener noreferrer" style={{ color: '#0a66c2', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4 }}>
-                                  <LinkedInIcon size={14} />
+                                <a href={p.linkedin.startsWith('http') ? p.linkedin : `https://${p.linkedin}`} target="_blank" rel="noopener noreferrer" style={{ color: '#0a66c2', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 5 }}>
+                                  <LinkedInIcon size={16} />
                                   Profile
                                 </a>
                               ) : '—'}
@@ -564,76 +578,106 @@ export default function Home() {
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
               <div>
-                <div style={{ fontSize: 18, fontWeight: 700, color: '#111827' }}>Contacts</div>
-                <div style={{ fontSize: 13, color: '#6b7280' }}>
+                <div style={{ fontSize: 24, fontWeight: 700, color: '#111827' }}>Contacts</div>
+                <div style={{ fontSize: 15, color: '#6b7280', marginTop: 4 }}>
                   {filteredContacts.length} {contactFilter === 'cardswitcher' ? 'CardSwitcher contacts' : 'total contacts'}
                 </div>
               </div>
               
-              <div style={{ display: 'flex', background: '#f3f4f6', borderRadius: 8, padding: 4 }}>
+              <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                <div style={{ display: 'flex', background: '#f3f4f6', borderRadius: 8, padding: 4 }}>
+                  <button
+                    onClick={() => setContactFilter('cardswitcher')}
+                    style={{
+                      padding: '8px 16px',
+                      borderRadius: 6,
+                      border: 'none',
+                      background: contactFilter === 'cardswitcher' ? '#fff' : 'transparent',
+                      color: contactFilter === 'cardswitcher' ? '#111827' : '#6b7280',
+                      fontSize: 14,
+                      fontWeight: 500,
+                      cursor: 'pointer',
+                      boxShadow: contactFilter === 'cardswitcher' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    CardSwitcher
+                  </button>
+                  <button
+                    onClick={() => setContactFilter('all')}
+                    style={{
+                      padding: '8px 16px',
+                      borderRadius: 6,
+                      border: 'none',
+                      background: contactFilter === 'all' ? '#fff' : 'transparent',
+                      color: contactFilter === 'all' ? '#111827' : '#6b7280',
+                      fontSize: 14,
+                      fontWeight: 500,
+                      cursor: 'pointer',
+                      boxShadow: contactFilter === 'all' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    All Contacts
+                  </button>
+                </div>
                 <button
-                  onClick={() => setContactFilter('cardswitcher')}
+                  onClick={handleExportCSV}
                   style={{
-                    padding: '6px 14px',
-                    borderRadius: 6,
+                    padding: '10px 20px',
+                    background: '#10b981',
+                    color: '#fff',
                     border: 'none',
-                    background: contactFilter === 'cardswitcher' ? '#fff' : 'transparent',
-                    color: contactFilter === 'cardswitcher' ? '#111827' : '#6b7280',
-                    fontSize: 13,
-                    fontWeight: 500,
+                    borderRadius: 8,
+                    fontSize: 14,
+                    fontWeight: 600,
                     cursor: 'pointer',
-                    boxShadow: contactFilter === 'cardswitcher' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    transition: 'background 0.2s'
                   }}
+                  onMouseEnter={(e) => e.target.style.background = '#059669'}
+                  onMouseLeave={(e) => e.target.style.background = '#10b981'}
                 >
-                  CardSwitcher
-                </button>
-                <button
-                  onClick={() => setContactFilter('all')}
-                  style={{
-                    padding: '6px 14px',
-                    borderRadius: 6,
-                    border: 'none',
-                    background: contactFilter === 'all' ? '#fff' : 'transparent',
-                    color: contactFilter === 'all' ? '#111827' : '#6b7280',
-                    fontSize: 13,
-                    fontWeight: 500,
-                    cursor: 'pointer',
-                    boxShadow: contactFilter === 'all' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
-                  }}
-                >
-                  All Contacts
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                  </svg>
+                  Export as CSV
                 </button>
               </div>
             </div>
 
-            <div style={{ border: '1px solid #e5e7eb', borderRadius: 10, overflow: 'hidden' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+            <div style={{ border: '1px solid #e5e7eb', borderRadius: 12, overflow: 'hidden', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 15 }}>
                 <thead>
                   <tr style={{ background: '#f9fafb' }}>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#6b7280', fontSize: 11, borderBottom: '1px solid #e5e7eb' }}>NAME</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#6b7280', fontSize: 11, borderBottom: '1px solid #e5e7eb' }}>ROLE</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#6b7280', fontSize: 11, borderBottom: '1px solid #e5e7eb' }}>TEAM</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#6b7280', fontSize: 11, borderBottom: '1px solid #e5e7eb' }}>EMAIL</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#6b7280', fontSize: 11, borderBottom: '1px solid #e5e7eb' }}>LINKEDIN</th>
+                    <th style={{ padding: '14px 18px', textAlign: 'left', fontWeight: 600, color: '#6b7280', fontSize: 12, letterSpacing: 0.5, borderBottom: '2px solid #e5e7eb' }}>NAME</th>
+                    <th style={{ padding: '14px 18px', textAlign: 'left', fontWeight: 600, color: '#6b7280', fontSize: 12, letterSpacing: 0.5, borderBottom: '2px solid #e5e7eb' }}>ROLE</th>
+                    <th style={{ padding: '14px 18px', textAlign: 'left', fontWeight: 600, color: '#6b7280', fontSize: 12, letterSpacing: 0.5, borderBottom: '2px solid #e5e7eb' }}>TEAM</th>
+                    <th style={{ padding: '14px 18px', textAlign: 'left', fontWeight: 600, color: '#6b7280', fontSize: 12, letterSpacing: 0.5, borderBottom: '2px solid #e5e7eb' }}>EMAIL</th>
+                    <th style={{ padding: '14px 18px', textAlign: 'left', fontWeight: 600, color: '#6b7280', fontSize: 12, letterSpacing: 0.5, borderBottom: '2px solid #e5e7eb' }}>LINKEDIN</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredContacts.map((p, i) => (
                     <tr key={i} style={{ background: p.isPrimary ? '#f0fdf4' : '#fff' }}>
-                      <td style={{ padding: '10px 16px', borderBottom: '1px solid #e5e7eb' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                          <Avatar name={p.name} size={32} isPrimary={p.isPrimary} />
-                          <span style={{ fontWeight: 500 }}>{p.name}</span>
-                          {p.isPrimary && <span style={{ background: '#10b981', color: '#fff', fontSize: 9, padding: '2px 6px', borderRadius: 4, fontWeight: 600 }}>PRIMARY</span>}
+                      <td style={{ padding: '12px 18px', borderBottom: '1px solid #e5e7eb' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                          <Avatar name={p.name} size={40} isPrimary={p.isPrimary} />
+                          <span style={{ fontWeight: 500, fontSize: 15 }}>{p.name}</span>
+                          {p.isPrimary && <span style={{ background: '#10b981', color: '#fff', fontSize: 11, padding: '3px 8px', borderRadius: 4, fontWeight: 600 }}>PRIMARY</span>}
                         </div>
                       </td>
-                      <td style={{ padding: '10px 16px', borderBottom: '1px solid #e5e7eb', color: '#6b7280' }}>{p.role}</td>
-                      <td style={{ padding: '10px 16px', borderBottom: '1px solid #e5e7eb', color: '#6b7280' }}>{p.team}</td>
-                      <td style={{ padding: '10px 16px', borderBottom: '1px solid #e5e7eb', color: '#6b7280', fontFamily: 'monospace', fontSize: 12 }}>{p.email || '—'}</td>
-                      <td style={{ padding: '10px 16px', borderBottom: '1px solid #e5e7eb', color: '#6b7280' }}>
+                      <td style={{ padding: '12px 18px', borderBottom: '1px solid #e5e7eb', color: '#6b7280', fontSize: 15 }}>{p.role}</td>
+                      <td style={{ padding: '12px 18px', borderBottom: '1px solid #e5e7eb', color: '#6b7280', fontSize: 15 }}>{p.team}</td>
+                      <td style={{ padding: '12px 18px', borderBottom: '1px solid #e5e7eb', color: '#6b7280', fontFamily: 'monospace', fontSize: 14 }}>{p.email || '—'}</td>
+                      <td style={{ padding: '12px 18px', borderBottom: '1px solid #e5e7eb', color: '#6b7280' }}>
                         {p.linkedin ? (
-                          <a href={p.linkedin.startsWith('http') ? p.linkedin : `https://${p.linkedin}`} target="_blank" rel="noopener noreferrer" style={{ color: '#0a66c2', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4 }}>
-                            <LinkedInIcon size={14} />
+                          <a href={p.linkedin.startsWith('http') ? p.linkedin : `https://${p.linkedin}`} target="_blank" rel="noopener noreferrer" style={{ color: '#0a66c2', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 5 }}>
+                            <LinkedInIcon size={16} />
                             Profile
                           </a>
                         ) : '—'}
