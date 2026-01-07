@@ -374,7 +374,7 @@ export default function Home() {
             {/* Founders */}
             {customer.founders && customer.founders.length > 0 && (
               <>
-                <SectionLabel>Founders</SectionLabel>
+            <SectionLabel>Founders</SectionLabel>
                 <div style={{ display: 'flex', justifyContent: 'center', gap: 48, flexWrap: 'wrap' }}>
                   {customer.founders.map((founder, idx) => (
                     <PersonCard 
@@ -388,7 +388,7 @@ export default function Home() {
                       isInterim={founder.isInterim}
                     />
                   ))}
-                </div>
+            </div>
               </>
             )}
 
@@ -415,7 +415,7 @@ export default function Home() {
             )}
 
             {/* Product Organization */}
-            {customer.orgChart && customer.orgChart.productOrg && customer.founders && customer.founders.find(f => f.expandKey === 'ryan') && expanded.ryan && (
+            {customer.orgChart && customer.orgChart.productOrg && customer.orgChart.productOrg.person && customer.founders && customer.founders.find(f => f.expandKey === 'ryan') && expanded.ryan && (
               <>
                 <SectionLabel color="#7c3aed">{customer.orgChart.productOrg.label}</SectionLabel>
                 <div style={{ display: 'flex', justifyContent: 'center' }}>
@@ -432,7 +432,7 @@ export default function Home() {
             )}
 
             {/* Directors */}
-            {customer.orgChart && customer.orgChart.productOrg && customer.orgChart.productOrg.directors && expanded.philip && (
+            {customer.orgChart && customer.orgChart.productOrg && customer.orgChart.productOrg.directors && customer.orgChart.productOrg.directors.length > 0 && expanded.philip && (
               <>
                 <SectionLabel color="#6366f1">Directors</SectionLabel>
                 <div style={{ display: 'flex', justifyContent: 'center', gap: 32, flexWrap: 'wrap' }}>
@@ -452,7 +452,7 @@ export default function Home() {
             )}
 
             {/* Spend Better Squads */}
-            {customer.orgChart && customer.orgChart.productOrg && customer.orgChart.productOrg.spendBetterSquads && expanded.brenden && (
+            {customer.orgChart && customer.orgChart.productOrg && customer.orgChart.productOrg.spendBetterSquads && customer.orgChart.productOrg.spendBetterSquads.length > 0 && expanded.brenden && (
               <>
                 <SectionLabel color="#059669">Spend Better Squads</SectionLabel>
                 <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 18 }}>
@@ -473,7 +473,7 @@ export default function Home() {
             )}
 
             {/* Cards Squads */}
-            {customer.orgChart && customer.orgChart.productOrg && customer.orgChart.productOrg.cardsSquads && expanded.baishi && (
+            {customer.orgChart && customer.orgChart.productOrg && customer.orgChart.productOrg.cardsSquads && customer.orgChart.productOrg.cardsSquads.length > 0 && expanded.baishi && (
               <>
                 <SectionLabel color="#2563eb">Cards Squads</SectionLabel>
                 <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 18 }}>
@@ -511,10 +511,10 @@ export default function Home() {
 
             {/* Reporting lines */}
             {customer.reportingLines && customer.reportingLines.length > 0 && (
-              <div style={{
+            <div style={{
                 marginTop: 48,
                 padding: 24,
-                background: '#fafafa',
+              background: '#fafafa',
                 borderRadius: 12,
                 maxWidth: 700,
                 margin: '48px auto 0',
@@ -528,6 +528,46 @@ export default function Home() {
                     <div style={{ fontSize: 14, color: '#374151', lineHeight: 1.6 }} dangerouslySetInnerHTML={{ __html: line.line }} />
                   </div>
                 ))}
+              </div>
+            )}
+
+            {/* Show organization overview when org chart is minimal */}
+            {(!customer.founders || customer.founders.length === 0) && customer.contacts && customer.contacts.length > 0 && (
+              <div style={{
+                marginTop: 48,
+                padding: 32,
+                background: '#f9fafb',
+                borderRadius: 12,
+                maxWidth: 900,
+                margin: '48px auto 0',
+                textAlign: 'center',
+                border: '1px solid #e5e7eb',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+              }}>
+                <div style={{ fontSize: 20, fontWeight: 600, color: '#111827', marginBottom: 12 }}>
+                  Organization Overview
+                </div>
+                <div style={{ fontSize: 15, color: '#6b7280', marginBottom: 28, lineHeight: 1.6 }}>
+                  View all contacts organized by team in the <strong>Teams</strong> or <strong>Contacts</strong> tabs above.
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 12 }}>
+                  {teams.map((team, idx) => {
+                    const teamCount = allPeople.filter(p => p.team === team).length;
+                    return (
+                      <div key={idx} style={{
+                        padding: '10px 18px',
+                        background: '#fff',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: 8,
+                        fontSize: 14,
+                        color: '#374151',
+                        boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                      }}>
+                        <strong style={{ color: '#111827' }}>{team}</strong> <span style={{ color: '#6b7280' }}>({teamCount})</span>
+              </div>
+                    );
+                  })}
+                </div>
               </div>
             )}
           </div>
