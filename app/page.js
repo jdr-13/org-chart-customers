@@ -1,9 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { customers, getCustomerIds, getCustomer, downloadCSV } from '../lib/data';
+import Login from './components/Login';
 
 export default function Home() {
+  const [authenticated, setAuthenticated] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState('chime');
   const [activeTab, setActiveTab] = useState('org');
   const [contactFilter, setContactFilter] = useState('cardswitcher');
@@ -15,6 +17,23 @@ export default function Home() {
     baishi: true,
     will: true
   });
+
+  useEffect(() => {
+    // Check if user is already authenticated
+    const authStatus = localStorage.getItem('authenticated');
+    if (authStatus === 'true') {
+      setAuthenticated(true);
+    }
+  }, []);
+
+  const handleLogin = () => {
+    setAuthenticated(true);
+  };
+
+  // Show login page if not authenticated
+  if (!authenticated) {
+    return <Login onLogin={handleLogin} />;
+  }
 
   const customer = getCustomer(selectedCustomer);
   const customerIds = getCustomerIds();
@@ -330,6 +349,36 @@ export default function Home() {
             </button>
           ))}
           </div>
+
+          {/* Logout Button */}
+          <button
+            onClick={() => {
+              localStorage.removeItem('authenticated');
+              setAuthenticated(false);
+            }}
+            style={{
+              padding: '8px 16px',
+              borderRadius: 8,
+              border: '1px solid #e5e7eb',
+              background: '#fff',
+              color: '#6b7280',
+              fontSize: 14,
+              fontWeight: 500,
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              marginLeft: 12
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.background = '#f9fafb';
+              e.target.style.borderColor = '#d1d5db';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.background = '#fff';
+              e.target.style.borderColor = '#e5e7eb';
+            }}
+          >
+            Logout
+          </button>
         </div>
       </div>
 
